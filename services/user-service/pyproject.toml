@@ -1,7 +1,7 @@
 [project]
-name = "like-service"
+name = "user-service"
 version = "0.1.0"
-description = "like service"
+description = "user service"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = []
