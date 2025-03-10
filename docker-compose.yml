@@ -1,0 +1,124 @@
+version: '3.8'
+
+services:
+  api-service:
+    build: ./api-service
+    container_name: api-service
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    env_file:
+      - ./api-service/.env
+    depends_on:
+      - rabbitmq
+      - postgres
+      - redis
+
+  like-service:
+    build: ./like-service
+    container_name: like-service
+    env_file:
+      - ./like-service/.env
+    depends_on:
+      - rabbitmq
+      - postgres
+      - redis
+
+  match-service:
+    build: ./match-service
+    container_name: match-service
+    env_file:
+      - ./match-service/.env
+    depends_on:
+      - rabbitmq
+      - postgres
+      - redis
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    env_file:
+      - ./notification-service/.env
+    depends_on:
+      - rabbitmq
+      - postgres
+      - redis
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    env_file:
+      - ./user-service/.env
+    depends_on:
+      - postgres
+      - redis
+
+  websocket-service:
+    build: ./websocket-service
+    container_name: websocket-service
+    env_file:
+      - ./websocket-service/.env
+    depends_on:
+      - rabbitmq
+      - postgres
+      - redis
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - .env.rabbitmq
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: always
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    env_file:
+      - .env.postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: main_db  # Базовая БД (не используется)
+    volumes:
+      - .postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  init-db:
+    image: postgres:15
+    container_name: init-db
+    depends_on:
+      - postgres
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    entrypoint: >
+      sh -c "
+      until pg_isready -h postgres -p 5432; do sleep 1; done;
+      psql -h postgres -U admin -d main_db -c 'CREATE DATABASE like_service_db;';
+      psql -h postgres -U admin -d main_db -c 'CREATE DATABASE match_service_db;';
+      psql -h postgres -U admin -d main_db -c 'CREATE DATABASE notification_service_db;';
+      psql -h postgres -U admin -d main_db -c 'CREATE DATABASE user_service_db;';
+      psql -h postgres -U admin -d main_db -c 'CREATE DATABASE websocket_service_db;';
+      exit 0;
+      "
+
+  redis:
+    image: "redis:7-alpine"
+    container_name: redis
+    ports:
+      - "6379:6379"
+    env_file:
+      - .env.redis
+    volumes:
+      - redis_data:/data
+    restart: always
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  redis_data:

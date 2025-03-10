@@ -1,7 +1,0 @@
-[project]
-name = "match-service"
-version = "0.1.0"
-description = "match service"
-readme = "README.md"
-requires-python = ">=3.12,<3.13"
-dependencies = []

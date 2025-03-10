@@ -1,0 +1,14 @@
+[project]
+name = "like-service"
+version = "0.1.0"
+description = "like service"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "alembic>=1.15.1",
+    "asyncpg>=0.30.0",
+    "faststream>=0.5.35",
+    "pydantic-settings>=2.8.1",
+    "sqlalchemy>=2.0.38",
+    "uvicorn>=0.34.0",
+]
